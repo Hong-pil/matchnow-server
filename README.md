@@ -27,18 +27,18 @@ $ brew install mongodb-community@7.0
 $ brew services start mongodb-community@7.0
 -  MongoDB가 정상 실행되는지 확인
 $ brew services list | grep mongodb
-3. 프로젝트 의존성 설치
+4. 프로젝트 의존성 설치
 $ cd /path/to/your/project
 $ pnpm install
-4. 환경 설정
+5. 환경 설정
 - .env 파일 확인
-5. 프로젝트 빌드 및 실행
+6. 프로젝트 빌드 및 실행
 - 개발 모드로 실행
 $ pnpm run start:dev
 - PM2로 실행
 $ pnpm run build
 $ pnpm run pm2:start:local
-6. 실행 확인
+7. 실행 확인
 - 서버 주소: http://localhost:4011
 - Health Check: http://localhost:4011/health
 - Swagger 문서: http://localhost:4011/document
