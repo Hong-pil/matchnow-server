@@ -12,11 +12,11 @@ NestJS 기반의 스포츠 매치 정보 API 서버입니다.
 ## 로컬(Mac)에서 실행하기
 1. Docker 앱 실행
 2. 필수 프로그램 설치 확인
-- Node.js 확인
-* $ node --version
-* $ npm --version
-- pnpm 설치
-   $ npm install -g pnpm
+* Node.js 확인
+- $ node --version
+- $ npm --version
+* pnpm 설치
+- $ npm install -g pnpm
 - PM2 설치
    $ npm install -g pm2
 3. MongoDB 설치 및 실행
