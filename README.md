@@ -13,8 +13,8 @@ NestJS 기반의 스포츠 매치 정보 API 서버입니다.
 1. Docker 앱 실행
 2. 필수 프로그램 설치 확인
 - Node.js 확인
-   $ node --version
-   $ npm --version
+* $ node --version
+* $ npm --version
 - pnpm 설치
    $ npm install -g pnpm
 - PM2 설치
