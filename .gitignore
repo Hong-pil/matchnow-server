@@ -38,12 +38,12 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 # Local environment files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-config/config.local.yml
+# .env
+# .env.development.local
+# .env.test.local
+# .env.production.local
+# .env.local
+# config/config.local.yml
 
 # MongoDB
 /data

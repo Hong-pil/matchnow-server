@@ -1,13 +1,33 @@
 # Match Now API
-
 NestJS 기반의 스포츠 매치 정보 API 서버입니다.
 
 ## 요구사항
-
 - Node.js 22.15.1
 - MongoDB 7.0 이상
 - pnpm
 - PM2 (글로벌 설치 권장)
+
+
+
+### 로컬(Mac)에서 실행하기
+1. Docker 앱 실행
+
+
+
+
+
+
+
+### 서버(Ubuntu Desktop PC)에서 실행하기
+
+
+
+
+
+
+
+
+
 
 ## 설치 및 실행
 # Node.js 버전 확인
