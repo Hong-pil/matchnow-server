@@ -1,6 +1,5 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import * as compression from 'compression';
@@ -11,10 +10,12 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const configService: ConfigService = app.get(ConfigService);
 
-  if (configService.get('appEnv') !== 'production') {
-    const swaggerConfig = new DocumentBuilder().setTitle(configService.get('appName')!).build();
+  // 개발 환경에서만 Swagger 활성화
+  if (process.env.NODE_ENV !== 'production') {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle(process.env.APP_NAME || 'Match Now API')
+      .build();
     const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('document', app, swaggerDocument, {
       jsonDocumentUrl: 'document/json',
@@ -26,12 +27,14 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(compression());
 
-  if (configService.get('appEnv') !== 'development') {
+  // 개발 환경이 아닐 때만 보안 미들웨어 적용
+  if (process.env.NODE_ENV !== 'development') {
     app.use(hpp());
     app.use(helmet());
   }
 
-  await app.listen(configService.get<number>('port') ?? 4011, '0.0.0.0');
+  const port = process.env.PORT || 4011;
+  await app.listen(port, '0.0.0.0');
 
   console.log(`Application is running on: ${await app.getUrl()}`);
 }

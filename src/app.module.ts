@@ -17,15 +17,11 @@ import { PlayersModule } from './modules/players/players.module';
 import { TeamsModule } from './modules/teams/teams.module';
 import { GamesModule } from './modules/games/games.module';
 
-import configuration from '../config/configuration';
-
 @Module({
   imports: [
     TerminusModule,
     ConfigModule.forRoot({
-      load: [configuration],
       isGlobal: true,
-      cache: true,
     }),
     ClsModule.forRoot({
       global: true,
@@ -40,11 +36,21 @@ import configuration from '../config/configuration';
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('db.service.connection.uri'),
-        autoCreate: true,
-        autoIndex: false,
-      }),
+      useFactory: (configService: ConfigService) => {
+        // 여러 방법으로 URI 시도
+        const uri = configService.get<string>('db.service.connection.uri') || 
+                    configService.get<string>('MONGODB_URI') ||
+                    process.env.MONGODB_URI || 
+                    'mongodb://localhost:27017/match-now-dev';
+        
+        console.log('🔍 Final MongoDB URI:', uri);
+        
+        return {
+          uri,
+          autoCreate: true,
+          autoIndex: false,
+        };
+      },
       inject: [ConfigService],
     }),
     UsersModule,
