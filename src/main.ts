@@ -11,16 +11,34 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 개발 환경에서만 Swagger 활성화
+   // 개발 환경에서만 Swagger 활성화
   if (process.env.NODE_ENV !== 'production') {
     const swaggerConfig = new DocumentBuilder()
       .setTitle(process.env.APP_NAME || 'Match Now API')
       .build();
     const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
-    SwaggerModule.setup('document', app, swaggerDocument, {
-      jsonDocumentUrl: 'document/json',
+    SwaggerModule.setup('api', app, swaggerDocument, {
+      jsonDocumentUrl: 'api-json',
     });
   }
+
+  // 기본 루트 경로 추가
+  app.use('/', (req, res, next) => {
+    if (req.path === '/') {
+      res.json({ 
+        message: 'Match Now API Server', 
+        status: 'running',
+        timestamp: new Date().toISOString(),
+        endpoints: {
+          health: '/health',
+          api: '/api',
+          docs: '/api'
+        }
+      });
+    } else {
+      next();
+    }
+  });
 
   app.useGlobalPipes(new ValidationPipe());
 
