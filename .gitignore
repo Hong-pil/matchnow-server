@@ -1,49 +1,41 @@
-# compiled output
-/dist
-/node_modules
-
-# Logs
-logs/
-*.log
+# Node.js
+node_modules
 npm-debug.log*
 pnpm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
 
-# PM2
-.pm2
+# Build output
+dist
+build
 
-# OS
+# Environment files
+.env
+.env.local
+
+# IDE
+.vscode
+.idea
+
+# OS files
 .DS_Store
+Thumbs.db
 
-# Tests
-/coverage
-/.nyc_output
+# Git
+.git
+.gitignore
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
 
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+# Logs
+logs
+*.log
 
-# Local environment files
-# .env
-# .env.development.local
-# .env.test.local
-# .env.production.local
-# .env.local
-# config/config.local.yml
+# Test files
+test
+tests
+__tests__
 
-# MongoDB
-/data
+# Docker volumes
+docker/

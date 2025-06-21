@@ -1,24 +1,45 @@
-# Production image, copy all the files and run next
-FROM node:23-alpine
+# 간단한 NestJS Dockerfile
 
-# Install pm2
-RUN npm install -g pm2
-
+# Base image
+FROM node:22.15.1-alpine AS base
 WORKDIR /app
 
-# set timezone
-RUN apk add --no-cache tzdata
-ENV TZ=Asia/Seoul
+# Install pnpm
+RUN npm install -g pnpm
 
-ARG NODE_ENV
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
 
-ENV NODE_ENV="${NODE_ENV}"
+# Development stage
+FROM base AS development
+# Install all dependencies
+RUN pnpm install
 
-COPY dist ./dist
-COPY node_modules ./node_modules
-COPY package.json ./package.json
-COPY pm2.yml ./pm2.yml
+# Copy source code
+COPY . .
 
+# Expose port
 EXPOSE 4011
 
-CMD [ "pm2-runtime", "start", "pm2.yml" ]
+# Start development server
+CMD ["pnpm", "run", "start:dev"]
+
+# Production stage (나중에 사용)
+FROM base AS production
+# Install only production dependencies
+RUN pnpm install --prod
+
+# Copy source code and build
+COPY . .
+RUN pnpm run build
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001 -G nodejs
+USER nestjs
+
+# Expose port
+EXPOSE 4011
+
+# Start production server
+CMD ["node", "dist/main"]

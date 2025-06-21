@@ -1,227 +1,731 @@
-# Match Now API
+# 🎯 Match Now - 매칭 서비스 백엔드
 
-NestJS 기반의 스포츠 매치 정보 API 서버입니다.
+NestJS와 MongoDB를 사용한 매칭 서비스 백엔드 API입니다.
 
-## 요구사항
+## 🚀 빠른 시작
 
-- Node.js v22.15.1 LTS 버전
-- MongoDB 4.4 이상 (AVX 미지원 CPU의 경우 4.4 권장)
-- pnpm
-- PM2 (글로벌 설치 권장)
-- Docker (MongoDB 실행용)
+### 전체 환경을 Docker로 실행하므로 로컬에 Node.js나 MongoDB 설치가 불필요합니다!
 
-## 로컬(Mac)에서 실행하기
+```bash
+# 1. 저장소 클론
+git clone <repository-url>
+cd matchnow-server
 
-1. **Docker 앱 실행**
+# 2. 환경변수 설정
+cp .env.example .env
+# .env 파일에서 비밀번호 등 수정
 
-2. **필수 프로그램 설치 확인**
-   - Node.js 확인
-     ```bash
-     $ node --version
-     $ npm --version
-     ```
-   - pnpm 설치
-     ```bash
-     $ npm install -g pnpm
-     ```
-   - PM2 설치
-     ```bash
-     $ npm install -g pm2
-     ```
+# 3. Docker로 실행
+docker-compose up -d
 
-3. **MongoDB 설치 및 실행**
-   - MongoDB 설치
-     ```bash
-     $ brew tap mongodb/brew
-     $ brew install mongodb-community@7.0
-     ```
-   - MongoDB 서비스 시작
-     ```bash
-     $ brew services start mongodb-community@7.0
-     ```
-   - MongoDB가 정상 실행되는지 확인
-     ```bash
-     $ brew services list | grep mongodb
-     ```
+# 4. 실행 확인
+curl http://localhost:4011
+```
 
-4. **프로젝트 의존성 설치**
-   ```bash
-   $ cd /path/to/your/project
-   $ pnpm install
-   ```
+## 📋 시스템 요구사항
 
-5. **환경 설정**
-   - .env 파일 확인
+- **Docker Desktop** (유일한 요구사항!)
+- macOS 10.14 이상 / Linux / Windows 10 이상
+- 최소 4GB RAM 권장
 
-6. **프로젝트 빌드 및 실행**
-   - 개발 모드로 실행
-     ```bash
-     $ pnpm run start:dev
-     ```
-   - PM2로 실행
-     ```bash
-     $ pnpm run build
-     $ pnpm run pm2:start:local
-     ```
+## 🏗️ 프로젝트 구조
 
-7. **실행 확인**
-   - 서버 주소: http://localhost:4011
-   - Health Check: http://localhost:4011/health
-   - Swagger 문서: http://localhost:4011/document
+```
+matchnow-server/
+├── 📄 docker-compose.yml     # Docker 서비스 정의
+├── 📄 Dockerfile            # NestJS 이미지 빌드
+├── 📄 .dockerignore         # Docker 빌드 제외 파일
+├── 📄 .env                  # 환경변수 (비공개)
+├── 📄 .env.example          # 환경변수 템플릿
+├── 📁 docker/               # Docker 데이터 저장소
+│   └── 📁 mongodb/
+│       ├── 📁 data/         # MongoDB 데이터 (영구 저장)
+│       └── 📁 logs/         # MongoDB 로그
+├── 📁 src/                  # NestJS 소스 코드
+├── 📄 package.json          # 프로젝트 의존성
+└── 📄 README.md
+```
 
-## 주요 명령어들
+## 🐳 Docker 서비스 구성
 
-- **개발 모드 실행 (파일 변경 시 자동 재시작)**
-  ```bash
-  $ pnpm run start:dev
-  ```
+| 서비스 | 포트 | 설명 | 접속 URL |
+|--------|------|------|----------|
+| **nestjs-app** | 4011 | NestJS 메인 애플리케이션 | http://localhost:4011 |
+| **mongodb** | 27017 | MongoDB 데이터베이스 | mongodb://localhost:27017 |
+| **mongo-express** | 8081 | MongoDB 웹 관리도구 (선택사항) | http://localhost:8081 |
 
-- **PM2 관련 명령어**
-  ```bash
-  $ npm run pm2:start:local    # PM2로 로컬 실행
-  $ npm run pm2:stop          # PM2 정지
-  $ npm run pm2:restart       # PM2 재시작
-  $ npm run pm2:logs          # 로그 확인
-  $ npm run pm2:status        # 상태 확인
-  ```
+## 🛠️ 개발 환경 설정
 
-- **테스트 실행**
-  ```bash
-  $ pnpm run test
-  ```
+### 📦 1단계: 기존 환경 정리 (선택사항)
 
-- **코드 포맷팅**
-  ```bash
-  $ pnpm run format
-  ```
+기존에 Node.js, MongoDB 등이 설치되어 있다면 충돌을 방지하기 위해 제거하는 것을 권장합니다.
 
-## 서버(Ubuntu Desktop PC)에서 실행하기
+**macOS 환경 정리:**
+```bash
+# 기존 개발 환경 완전 정리 스크립트 실행
+# (위에서 제공된 cleanup_macos.sh 스크립트 사용)
+chmod +x cleanup_macos.sh
+./cleanup_macos.sh
 
-### 1단계: 기본 환경 준비
+# 터미널 재시작 또는
+source ~/.zshrc
+```
 
+### 🐳 2단계: Docker 설치
+
+**macOS:**
+```bash
+# Homebrew 설치 (없다면)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Homebrew 버전 확인
+brew --version
+# 출력 예시: Homebrew 4.x.x
+
+# Docker Desktop 설치
+brew install --cask docker
+
+# Docker 실행
+open /Applications/Docker.app
+
+# Docker 설치 확인 (Docker Desktop 실행 후)
+docker --version
+# 출력 예시: Docker version 24.x.x
+
+docker-compose --version
+# 출력 예시: Docker Compose version v2.x.x
+```
+
+**Linux (Ubuntu):**
 ```bash
 # 시스템 패키지 업데이트
-sudo apt update && sudo apt upgrade -y
+sudo apt update
 
-# curl과 git 설치
-sudo apt install -y curl git
+# Docker 설치
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# Docker Compose 설치
+sudo apt install docker-compose-plugin
+
+# Docker 설치 확인
+docker --version
+# 출력 예시: Docker version 24.x.x
+
+docker compose version
+# 출력 예시: Docker Compose version v2.x.x
+
+# 현재 사용자를 docker 그룹에 추가
+sudo usermod -aG docker $USER
+
+# 변경사항 적용을 위해 로그아웃 후 다시 로그인 또는
+newgrp docker
 ```
 
-### 2단계: Node.js v22 설치
+**Windows:**
+```bash
+# Docker Desktop for Windows 다운로드 및 설치
+# https://docs.docker.com/desktop/install/windows-install/
+
+# PowerShell에서 설치 확인
+docker --version
+# 출력 예시: Docker version 24.x.x
+
+docker-compose --version
+# 출력 예시: Docker Compose version v2.x.x
+```
+
+### 📁 3단계: 프로젝트 준비
 
 ```bash
-# NodeSource 저장소 추가 (Node.js 22.x용)
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+# 프로젝트 클론
+git clone <repository-url>
+cd matchnow-server
 
-# Node.js 설치
-sudo apt-get install -y nodejs
+# Git 설치 확인 (필요시)
+git --version
+# 출력 예시: git version 2.x.x
 
-# 설치 확인
-node --version
-npm --version
+# 데이터 디렉토리 생성
+mkdir -p docker/mongodb/{data,logs}
+
+# 디렉토리 구조 확인
+ls -la docker/mongodb/
+# 출력: data/, logs/ 디렉토리 확인
+
+# 환경변수 파일 생성
+cp .env.example .env
+
+# 파일 생성 확인
+ls -la | grep env
+# 출력: .env, .env.example 파일 확인
 ```
 
-### 3단계: pnpm과 PM2 설치
+### 🔐 4단계: 환경변수 설정
 
-```bash
-# pnpm 설치
-npm install -g pnpm
+`.env` 파일을 열어서 보안을 위해 기본 비밀번호들을 변경하세요:
 
-# PM2 설치
-npm install -g pm2
-
-# 설치 확인
-pnpm --version
-pm2 --version
-```
-
-### 4단계: MongoDB 4.4 설치
-
-```bash
-# MongoDB 4.4 컨테이너 실행 (AVX 미지원 CPU 호환)
-# 처음엔 MongoDB 7.0 버전으로 시도했으나 현재 Ubuntu Desktop PC에서 사용 중인 CPU가 AVX 지원하지 않아서 4. 버전으로 설치함. (5. 버전부터 CPU가 AVX 지원해야 함)
-# AVX 지원 확인
-grep -o 'avx[^ ]*' /proc/cpuinfo
-# 결과가 없으면 AVX 미지원
-# 결과가 있으면 AVX 지원
-
-docker run -d \
-  --name mongodb \
-  --restart unless-stopped \
-  -p 27017:27017 \
-  -v mongodb_data:/data/db \
-  mongo:4.4
-
-# 실행 확인
-docker ps
-docker logs mongodb
-```
-
-**참고**: AVX 지원 CPU가 있다면 `mongo:7.0` 사용 가능
-
-### 5단계: 프로젝트 클론 및 설정
-
-```bash
-# 프로젝트 클론 (GitHub에서)
-git clone <your-repository-url>
-cd match-now-server
-
-# 또는 기존 프로젝트가 있다면
-cd /path/to/match-now-server
-
-# 프로젝트 의존성 설치
-pnpm install
-```
-
-### 6단계: 환경 설정
-
-```bash
-# .env 파일 생성 및 편집
-nano .env
-```
-
-**.env 파일 내용:**
 ```env
-MONGODB_URI=mongodb://localhost:27017/match-now-dev
+# ===================
+# 기본 애플리케이션 설정
+# ===================
+NODE_ENV=development
 PORT=4011
-NODE_ENV=production
-APP_NAME=Match Now API
+
+# ===================
+# MongoDB 설정
+# ===================
+MONGO_ROOT_USERNAME=admin
+MONGO_ROOT_PASSWORD=MongoDB_Password_2024!  # 🔐 변경 필요
+MONGO_DATABASE=matchnow_dev
+
+# MongoDB 연결 URI (Docker 내부 통신용)
+MONGODB_URI=mongodb://admin:MongoDB_Password_2024!@mongodb:27017/matchnow_dev?authSource=admin
+
+# ===================
+# JWT 설정
+# ===================
+JWT_SECRET=your_super_secret_jwt_key_change_this_later  # 🔐 변경 필요
+
+# ===================
+# MongoDB 관리도구 비밀번호
+# ===================
+MONGO_EXPRESS_PASSWORD=admin123  # 🔐 변경 필요
 ```
 
-### 7단계: 프로젝트 빌드 및 실행
+**보안 팁:**
+- 비밀번호는 최소 16자 이상 사용
+- 대소문자, 숫자, 특수문자 조합 사용
+- 개발/스테이징/프로덕션 환경별로 다른 비밀번호 사용
+
+## 🚀 실행 명령어
+
+### 🎯 기본 실행 (NestJS + MongoDB)
 
 ```bash
-# 프로젝트 빌드
-pnpm run build
+# Docker 서비스 상태 확인
+docker info
+# Docker가 실행 중인지 확인
 
-# PM2로 실행
-pnpm run pm2:start:local
+# 백그라운드에서 실행
+docker-compose up -d
 
 # 실행 상태 확인
-pm2 status
-pm2 logs
-```
+docker-compose ps
+# 출력 예시:
+# NAME                    COMMAND                  SERVICE     STATUS      PORTS
+# matchnow-mongodb        "docker-entrypoint.s…"  mongodb     Up          0.0.0.0:27017->27017/tcp
+# matchnow-nestjs         "docker-entrypoint.s…"  nestjs-app  Up          0.0.0.0:4011->4011/tcp
 
-### 8단계: 실행 확인
-
-```bash
-# Health Check 확인
+# 서비스 상태 확인
 curl http://localhost:4011/health
+# 또는 브라우저에서 http://localhost:4011 접속
 
-# 브라우저에서 확인 (GUI 환경인 경우)
-# http://localhost:4011/health
-# http://localhost:4011/document (Swagger 문서)
+# 로그 확인
+docker-compose logs -f
 ```
 
-### MongoDB 관리 명령어 (Ubuntu)
+### 🛠️ 관리도구와 함께 실행 (개발용)
 
 ```bash
-# MongoDB 서비스 관리
-sudo systemctl start mongod     # 시작
-sudo systemctl stop mongod      # 정지
-sudo systemctl restart mongod   # 재시작
-sudo systemctl status mongod    # 상태 확인
+# MongoDB 웹 관리도구 포함 실행
+docker-compose --profile dev-tools up -d
 
-# MongoDB 연결 테스트
-mongosh mongodb://localhost:27017/match-now-dev
+# 관리도구 접속 확인
+curl http://localhost:8081
+# 또는 브라우저에서 http://localhost:8081 접속
+# 로그인: admin / admin123 (환경변수에서 설정한 값)
 ```
+
+### 🔧 서비스 제어
+
+```bash
+# 서비스 정지
+docker-compose down
+
+# 서비스 정지 및 볼륨 삭제 (데이터 완전 삭제)
+docker-compose down -v
+
+# 특정 서비스만 재시작
+docker-compose restart nestjs-app
+
+# 이미지 재빌드 (코드 변경 후)
+docker-compose up -d --build nestjs-app
+
+# 실행 중인 컨테이너 확인
+docker ps
+
+# 모든 컨테이너 확인 (정지된 것 포함)
+docker ps -a
+```
+
+## 🔧 개발 워크플로우
+
+### 💻 코드 개발
+
+```bash
+# 실시간 로그 확인하며 개발
+docker-compose logs -f nestjs-app
+
+# 코드 수정 → 자동 Hot Reload ✅
+# src/ 폴더의 파일 변경 시 자동으로 서버 재시작됨
+
+# API 테스트
+curl -X GET http://localhost:4011/api/users
+curl -X POST http://localhost:4011/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test","password":"test123"}'
+```
+
+### 📦 패키지 관리
+
+```bash
+# 새 패키지 설치
+docker-compose exec nestjs-app pnpm add package-name
+
+# 개발용 패키지 설치
+docker-compose exec nestjs-app pnpm add -D package-name
+
+# 패키지 설치 후 컨테이너 재시작
+docker-compose restart nestjs-app
+
+# 패키지 제거
+docker-compose exec nestjs-app pnpm remove package-name
+
+# 의존성 확인
+docker-compose exec nestjs-app pnpm list
+```
+
+### 🗃️ 데이터베이스 관리
+
+```bash
+# MongoDB Shell 접속
+docker-compose exec mongodb mongo -u admin -p
+
+# MongoDB 상태 확인
+docker-compose exec mongodb mongo -u admin -p --eval "db.adminCommand('ping')"
+
+# 데이터베이스 목록 확인
+docker-compose exec mongodb mongo -u admin -p --eval "show dbs"
+
+# 컬렉션 목록 확인
+docker-compose exec mongodb mongo -u admin -p matchnow_dev --eval "show collections"
+
+# 웹 관리도구 사용 (더 편리함)
+open http://localhost:8081
+```
+
+## 🌐 API 엔드포인트
+
+### 📍 기본 엔드포인트
+
+```bash
+# Health Check
+curl http://localhost:4011/health
+# 응답: {"status":"ok","timestamp":"..."}
+
+# API 문서 (Swagger)
+open http://localhost:4011/api
+
+# API 버전 정보
+curl http://localhost:4011/api/version
+```
+
+### 🔐 인증 API
+
+```bash
+# 회원가입
+curl -X POST http://localhost:4011/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@example.com", 
+    "password": "test123"
+  }'
+
+# 로그인
+curl -X POST http://localhost:4011/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "test123"
+  }'
+```
+
+### 👤 사용자 API
+
+```bash
+# 프로필 조회 (JWT 토큰 필요)
+curl -X GET http://localhost:4011/users/profile \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# 프로필 수정
+curl -X PUT http://localhost:4011/users/profile \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "name": "Updated Name",
+    "bio": "Updated bio"
+  }'
+```
+
+### 💕 매칭 API
+
+```bash
+# 매칭 목록 조회
+curl -X GET http://localhost:4011/matches \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# 매칭 생성
+curl -X POST http://localhost:4011/matches \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "targetUserId": "user_id_here"
+  }'
+```
+
+## 🗂️ 데이터베이스 스키마
+
+### MongoDB 컬렉션
+
+**users 컬렉션:**
+```javascript
+{
+  _id: ObjectId,
+  username: String,
+  email: String,
+  password: String (hashed),
+  profile: {
+    name: String,
+    age: Number,
+    bio: String,
+    photos: [String],
+    location: {
+      type: "Point",
+      coordinates: [longitude, latitude]
+    }
+  },
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+**matches 컬렉션:**
+```javascript
+{
+  _id: ObjectId,
+  user1: ObjectId,
+  user2: ObjectId,
+  status: String, // 'pending', 'accepted', 'declined'
+  createdAt: Date,
+  matchedAt: Date
+}
+```
+
+**conversations 컬렉션:**
+```javascript
+{
+  _id: ObjectId,
+  participants: [ObjectId],
+  messages: [{
+    sender: ObjectId,
+    content: String,
+    timestamp: Date,
+    readBy: [ObjectId]
+  }],
+  lastActivity: Date
+}
+```
+
+### 📊 데이터베이스 연결 정보
+
+```
+Host: localhost
+Port: 27017
+Database: matchnow_dev
+Username: admin
+Password: (환경변수에서 설정)
+Auth Database: admin
+```
+
+## 🔍 문제 해결
+
+### 🚫 포트 충돌 해결
+
+```bash
+# 포트 사용 확인
+lsof -i :4011    # NestJS 포트
+lsof -i :27017   # MongoDB 포트  
+lsof -i :8081    # Mongo Express 포트
+
+# 프로세스 종료
+kill -9 <PID>
+
+# Docker 컨테이너에서 포트 사용 확인
+docker-compose ps
+```
+
+### 🐳 Docker 관련 문제
+
+```bash
+# Docker 서비스 상태 확인
+docker info
+# Docker가 실행 중인지 확인
+
+# Docker Desktop 재시작 (macOS)
+osascript -e 'quit app "Docker"'
+open /Applications/Docker.app
+
+# Docker 데몬 재시작 (Linux)
+sudo systemctl restart docker
+
+# 컨테이너 로그 확인
+docker-compose logs nestjs-app
+docker-compose logs mongodb
+
+# 컨테이너 내부 접속하여 디버깅
+docker-compose exec nestjs-app sh
+docker-compose exec mongodb mongo -u admin -p
+```
+
+### 📁 권한 문제 해결
+
+```bash
+# Docker 데이터 디렉토리 권한 설정 (Linux/macOS)
+sudo chown -R $USER:$USER docker/
+
+# Docker 그룹에 사용자 추가 (Linux)
+sudo usermod -aG docker $USER
+newgrp docker
+
+# 권한 확인
+ls -la docker/mongodb/
+```
+
+### 🔄 완전 초기화
+
+```bash
+# 모든 컨테이너 정지 및 삭제 (데이터 포함)
+docker-compose down -v
+
+# Docker 이미지 삭제
+docker rmi $(docker images -q matchnow*)
+
+# 캐시 정리
+docker system prune -a
+
+# 완전히 새로 시작
+docker-compose up -d --build
+```
+
+### 🌐 네트워크 문제
+
+```bash
+# Docker 네트워크 확인
+docker network ls
+
+# 특정 네트워크 상세 정보
+docker network inspect matchnow-server_matchnow-network
+
+# 네트워크 재생성
+docker-compose down
+docker network prune
+docker-compose up -d
+```
+
+## 📝 로그 확인 및 디버깅
+
+### 🔍 로그 명령어
+
+```bash
+# 모든 서비스 로그 (실시간)
+docker-compose logs -f
+
+# 특정 서비스 로그
+docker-compose logs -f nestjs-app
+docker-compose logs -f mongodb
+
+# 최근 N줄만 확인
+docker-compose logs --tail=100 nestjs-app
+
+# 특정 시간 이후 로그
+docker-compose logs --since="2024-01-01T12:00:00" nestjs-app
+
+# 로그 파일로 저장
+docker-compose logs nestjs-app > app.log
+```
+
+### 🐛 디버깅 팁
+
+```bash
+# 컨테이너 내부 파일 시스템 확인
+docker-compose exec nestjs-app ls -la
+docker-compose exec nestjs-app cat package.json
+
+# 환경변수 확인
+docker-compose exec nestjs-app env | grep MONGO
+
+# 네트워크 연결 테스트
+docker-compose exec nestjs-app ping mongodb
+docker-compose exec nestjs-app curl http://mongodb:27017
+
+# 프로세스 확인
+docker-compose exec nestjs-app ps aux
+```
+
+## 🚀 배포 가이드
+
+### 🏠 로컬 개발 환경
+
+```bash
+# 개발 모드로 실행
+docker-compose up -d
+
+# 관리도구 포함
+docker-compose --profile dev-tools up -d
+```
+
+### 🧪 스테이징 환경
+
+```bash
+# 스테이징용 환경변수 파일 준비
+cp .env .env.staging
+
+# 스테이징 환경으로 실행
+NODE_ENV=staging docker-compose up -d
+```
+
+### 🌐 프로덕션 환경
+
+```bash
+# 프로덕션용 환경변수 설정
+cp .env .env.production
+# 보안 강화: 복잡한 비밀번호, JWT 시크릿 변경
+
+# 프로덕션 모드로 빌드 및 실행
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# SSL 인증서 설정 (Nginx 사용 시)
+# Nginx 설정은 나중에 추가 예정
+```
+
+## 📊 성능 모니터링
+
+### 📈 리소스 사용량 확인
+
+```bash
+# Docker 컨테이너 리소스 사용량
+docker stats
+
+# 특정 컨테이너 상세 정보
+docker inspect matchnow-nestjs
+docker inspect matchnow-mongodb
+
+# 디스크 사용량
+docker system df
+du -sh docker/mongodb/data
+```
+
+### 🔍 성능 측정
+
+```bash
+# API 응답 시간 측정
+time curl http://localhost:4011/health
+
+# 동시 요청 테스트 (Apache Bench 사용 시)
+ab -n 1000 -c 10 http://localhost:4011/api/users
+
+# MongoDB 성능 확인
+docker-compose exec mongodb mongo -u admin -p --eval "db.runCommand({serverStatus: 1})"
+```
+
+## 🤝 개발 팀 협업
+
+### 📥 새 팀원 온보딩
+
+```bash
+# 1. 저장소 클론
+git clone <repository-url>
+cd matchnow-server
+
+# 2. 환경변수 설정
+cp .env.example .env
+# .env 파일 비밀번호 수정
+
+# 3. 한 번에 실행
+docker-compose up -d
+
+# 4. 접속 확인
+curl http://localhost:4011/health
+```
+
+### 🔄 코드 동기화
+
+```bash
+# 최신 코드 받기
+git pull origin main
+
+# 의존성 업데이트가 있다면 재빌드
+docker-compose up -d --build
+
+# 데이터베이스 마이그레이션 (필요시)
+docker-compose exec nestjs-app pnpm run migration:run
+```
+
+### 📋 개발 규칙
+
+1. **브랜치 전략**: `main` → `develop` → `feature/기능명`
+2. **코드 리뷰**: PR 필수, 최소 1명 승인
+3. **환경변수**: `.env` 파일은 커밋하지 않음
+4. **Docker**: 모든 개발은 Docker 환경에서 진행
+
+## 🧪 테스트
+
+### 🔧 유닛 테스트
+
+```bash
+# 테스트 실행
+docker-compose exec nestjs-app pnpm test
+
+# 테스트 커버리지
+docker-compose exec nestjs-app pnpm test:cov
+
+# 테스트 파일 감시 모드
+docker-compose exec nestjs-app pnpm test:watch
+```
+
+### 🌐 통합 테스트
+
+```bash
+# E2E 테스트 실행
+docker-compose exec nestjs-app pnpm test:e2e
+
+# API 테스트 (Postman 컬렉션)
+# postman/ 폴더의 컬렉션 파일 import
+```
+
+## 📄 라이선스
+
+이 프로젝트는 MIT 라이선스 하에 있습니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
+
+## 🆘 지원 및 문의
+
+### 🐛 버그 리포트
+문제가 있으시면 [GitHub Issues](https://github.com/your-repo/issues)에 등록해주세요.
+
+### 💬 커뮤니티
+- **Discord**: [개발자 커뮤니티 링크]
+- **Slack**: [팀 워크스페이스 링크]
+
+### 📚 추가 자료
+- **API 문서**: http://localhost:4011/api (Swagger)
+- **NestJS 공식 문서**: https://nestjs.com
+- **MongoDB 공식 문서**: https://docs.mongodb.com
+- **Docker 공식 문서**: https://docs.docker.com
+
+---
+
+**🎯 Happy Coding! 즐거운 개발 되세요!**
+
+> 💡 **팁**: 이 README는 살아있는 문서입니다. 프로젝트가 발전함에 따라 지속적으로 업데이트됩니다.
