@@ -38,4 +38,4 @@ tests
 __tests__
 
 # Docker volumes
-# docker/
+docker/
